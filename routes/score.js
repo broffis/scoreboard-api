@@ -70,6 +70,7 @@ router.route('/').get((req, res) => {
               points: 0,
               player_name: player.name,
               player_id: player.id,
+              group_id: player.group_id,
               event_name: evt.event_name,
               country_name: data_from_countries.name,
               country_flag: data_from_countries.flag,
@@ -150,6 +151,8 @@ router.route('/filter/byGroup/:id').get((req, res) => {
 
       if (scores.length === 0 ) {
         finalScores = [];
+        
+        players = players.filter(player => player.group_id === req.params.id);
 
         players.forEach(player => {
           const [data_from_groups] = groups.filter(g => player.group_id === g.id);
@@ -159,6 +162,7 @@ router.route('/filter/byGroup/:id').get((req, res) => {
             let data = {
               points: 0,
               player_name: player.name,
+              group_id: player.group_id,
               player_id: player.id,
               event_name: evt.event_name,
               country_name: data_from_countries.name,
@@ -203,6 +207,8 @@ router.route('/filter/byComp/:id').get((req, res) => {
   Score.find()
     .then(scores => {
       let finalScores;
+
+      players = players.filter(player => player.competition_id === req.params.id);
 
       if (scores.length === 0 ) {
         finalScores = [];
