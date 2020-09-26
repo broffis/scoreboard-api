@@ -14,7 +14,8 @@ Player.find().then(p => players = p.map(val => {
     id: `${val._id}`,
     name: val.name,
     country_id: val.country_id,
-    group_id: val.group_id
+    group_id: val.group_id,
+    competition_id: val.competition_id
   };
 }));
 Evt.find().then(e => evts = e.map(val => {
@@ -55,25 +56,51 @@ Comp.find().then(c => competitions = c.map(val => {
 router.route('/').get((req, res) => {
   Score.find()
     .then(scores => {
+      let finalScores;
 
-      let finalScores = scores.map(sc => {
-        const data = sc._doc;
+      if (scores.length === 0 ) {
+        finalScores = [];
 
-        const [data_from_players] = players.filter(p => data.player_id === p.id);
-        const [data_from_evts] = evts.filter(e => data.event_id === e.id);
-        const [data_from_countries] = countries.filter(c => data_from_players.country_id === c.id);
-        const [data_from_groups] = groups.filter(g => data_from_players.group_id === g.id);
+        players.forEach(player => {
+          const [data_from_groups] = groups.filter(g => player.group_id === g.id);
+          const [data_from_countries] = countries.filter(c => player.country_id === c.id);
 
-        return {
-          ...data,
-          player_name: data_from_players.name,
-          event_name: data_from_evts.name,
-          country_name: data_from_countries.name,
-          country_flag: data_from_countries.flag,
-          background_color: data_from_groups.background_color,
-          border_color: data_from_groups.border_color
-        }
-      });
+          evts.forEach(evt => {
+            let data = {
+              points: 0,
+              player_name: player.name,
+              player_id: player.id,
+              event_name: evt.event_name,
+              country_name: data_from_countries.name,
+              country_flag: data_from_countries.flag,
+              background_color: data_from_groups.background_color,
+              border_color: data_from_groups.border_color,
+              competition_id: player.competition_id
+            }
+
+            finalScores.push(data);
+          })
+        })
+      } else {
+        finalScores = scores.map(sc => {
+          const data = sc._doc;
+
+          const [data_from_players] = players.filter(p => data.player_id === p.id);
+          const [data_from_evts] = evts.filter(e => data.event_id === e.id);
+          const [data_from_countries] = countries.filter(c => data_from_players.country_id === c.id);
+          const [data_from_groups] = groups.filter(g => data_from_players.group_id === g.id);
+
+          return {
+            ...data,
+            player_name: data_from_players.name,
+            event_name: data_from_evts.name,
+            country_name: data_from_countries.name,
+            country_flag: data_from_countries.flag,
+            background_color: data_from_groups.background_color,
+            border_color: data_from_groups.border_color
+          }
+        });
+      }
       res.json(finalScores);
     })
     .catch(err => res.status(400).json('Error: ' + err));
@@ -119,7 +146,33 @@ router.route('/filter/byEvent/:id').get((req, res) => {
 router.route('/filter/byGroup/:id').get((req, res) => {
   Score.find()
     .then(scores => {
-      scores = scores.filter(score => score.group_id === req.params.id)
+      let finalScores;
+
+      if (scores.length === 0 ) {
+        finalScores = [];
+
+        players.forEach(player => {
+          const [data_from_groups] = groups.filter(g => player.group_id === g.id);
+          const [data_from_countries] = countries.filter(c => player.country_id === c.id);
+
+          evts.forEach(evt => {
+            let data = {
+              points: 0,
+              player_name: player.name,
+              player_id: player.id,
+              event_name: evt.event_name,
+              country_name: data_from_countries.name,
+              country_flag: data_from_countries.flag,
+              background_color: data_from_groups.background_color,
+              border_color: data_from_groups.border_color,
+              competition_id: player.competition_id
+            }
+
+            finalScores.push(data);
+          })
+        })
+      } else { 
+        finalScores = scores.filter(score => score.group_id === req.params.id)
         .map(sc => {
           const data = sc._doc;
 
@@ -138,7 +191,9 @@ router.route('/filter/byGroup/:id').get((req, res) => {
             border_color: data_from_groups.border_color
           }
         });
-      res.json(scores);
+      }
+      
+      res.json(finalScores);
     })
     .catch(err => res.status(400).json('Error: ' + err));
 });
@@ -147,7 +202,33 @@ router.route('/filter/byGroup/:id').get((req, res) => {
 router.route('/filter/byComp/:id').get((req, res) => {
   Score.find()
     .then(scores => {
-      scores = scores.filter(score => score.competition_id === req.params.id)
+      let finalScores;
+
+      if (scores.length === 0 ) {
+        finalScores = [];
+
+        players.forEach(player => {
+          const [data_from_groups] = groups.filter(g => player.group_id === g.id);
+          const [data_from_countries] = countries.filter(c => player.country_id === c.id);
+
+          evts.forEach(evt => {
+            let data = {
+              points: 0,
+              player_name: player.name,
+              player_id: player.id,
+              event_name: evt.event_name,
+              country_name: data_from_countries.name,
+              country_flag: data_from_countries.flag,
+              background_color: data_from_groups.background_color,
+              border_color: data_from_groups.border_color,
+              competition_id: player.competition_id
+            }
+
+            finalScores.push(data);
+          })
+        })
+      } else {
+        finalScores = scores.filter(score => score.competition_id === req.params.id)
         .map(sc => {
           const data = sc._doc;
 
@@ -166,7 +247,9 @@ router.route('/filter/byComp/:id').get((req, res) => {
             border_color: data_from_groups.border_color
           }
         });
-      res.json(scores);
+      }
+      
+      res.json(finalScores);
     })
     .catch(err => res.status(400).json('Error: ' + err));
 });

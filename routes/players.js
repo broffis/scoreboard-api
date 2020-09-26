@@ -84,7 +84,9 @@ router.route('/filter/byGroup/:id').get((req, res) => {
             group_name: data_from_groups.name,
           }
         })
+      res.json(players)
     })
+    .catch(err => res.status(400).json('Error: ' + err));
 })
 
 // Add New
